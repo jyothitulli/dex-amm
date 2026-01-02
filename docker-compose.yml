@@ -3,13 +3,10 @@ version: '3.8'
 services:
   app:
     build: .
-    network_mode: "host"
     container_name: dex-amm-evaluation
     volumes:
       - .:/app
       - /app/node_modules
-      # Add this line below to map the compiler cache
-      - ${LOCALAPPDATA}/hardhat-nodejs:/root/.cache/hardhat-nodejs
     environment:
       - NODE_ENV=test
     command: tail -f /dev/null

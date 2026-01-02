@@ -1,17 +1,26 @@
-const hre = require("hardhat");
+import pkg from "hardhat";
+const { ethers } = pkg;
 
 async function main() {
-  const MockERC20 = await hre.ethers.getContractFactory("MockERC20");
-  const tA = await MockERC20.deploy("Token A", "TKA");
-  const tB = await MockERC20.deploy("Token B", "TKB");
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying with:", deployer.address);
 
-  const DEX = await hre.ethers.getContractFactory("DEX");
-  const dex = await DEX.deploy(tA.address, tB.address);
+  const Token = await ethers.getContractFactory("MockERC20");
+  const tA = await Token.deploy("Token A", "TKA");
+  const tB = await Token.deploy("Token B", "TKB");
 
-  console.log("DEX deployed to:", dex.address);
+  // For Hardhat v2.19+, use .waitForDeployment() instead of .deployed()
+  await tA.waitForDeployment();
+  await tB.waitForDeployment();
+
+  const DEX = await ethers.getContractFactory("DEX");
+  const dex = await DEX.deploy(await tA.getAddress(), await tB.getAddress());
+  await dex.waitForDeployment();
+
+  console.log("DEX Address:", await dex.getAddress());
 }
 
 main().catch((error) => {
   console.error(error);
-  process.exitCode = 1;
+  process.exit(1);
 });
